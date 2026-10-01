@@ -1,5 +1,7 @@
 #!/bin/sh
 
+export SERVER_PORT=8080
+
 echo "Starting Spring Boot backend..."
 
 java -jar /app/hospital-management.jar &
