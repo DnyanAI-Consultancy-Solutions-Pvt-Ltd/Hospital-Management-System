@@ -1,0 +1,24 @@
+# Node
+node_modules/
+hospital-frontend/node_modules/
+hospital-frontend/dist/
+
+# Java / Maven
+hospital-management/target/
+
+# IDE
+.metadata/
+.settings/
+.classpath
+.project
+
+# Environment / secrets
+.env
+*.env
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
