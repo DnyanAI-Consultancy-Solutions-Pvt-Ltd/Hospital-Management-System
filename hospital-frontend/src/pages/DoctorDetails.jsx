@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { API_BASE_URL } from "../services/api";
-
+import API_BASE_URL from "../services/api";
 function DoctorDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
