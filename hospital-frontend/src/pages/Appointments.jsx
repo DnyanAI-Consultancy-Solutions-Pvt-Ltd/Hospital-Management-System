@@ -263,17 +263,19 @@ function Appointments() {
         }
       );
 
-      const text = await response.text();
+     const text = await response.text();
 
-      if (!response.ok) {
-        throw new Error(
-          text || "Appointment booking failed"
-        );
-      }
+if (!response.ok) {
+  throw new Error(
+    text || "Appointment booking failed"
+  );
+}
 
-      setMessage(
-        "Appointment booked successfully."
-      );
+const data = JSON.parse(text);
+
+setMessage(
+  `Appointment booked successfully. Token No: ${data.tokenNumber}`
+);
 
       // Reset form
       setForm({
@@ -830,7 +832,7 @@ function Appointments() {
                 <tr>
 
                   <th>ID</th>
-
+<th>Token</th>
                   <th>Patient</th>
 
                   <th>Doctor</th>
@@ -863,6 +865,12 @@ function Appointments() {
                       <td>
                         #{appointment.id}
                       </td>
+
+<td>
+  <strong>
+    {appointment.tokenNumber || "-"}
+  </strong>
+</td>
 
                       <td>
 

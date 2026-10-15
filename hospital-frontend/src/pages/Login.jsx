@@ -11,14 +11,16 @@ function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
+const handleLogin = async (e) => {
+  e.preventDefault();
 
-    setError("");
-    setLoading(true);
+  setError("");
+  setLoading(true);
 
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/api/auth/login`,
+      {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -27,26 +29,41 @@ function Login() {
           username,
           password,
         }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Invalid username or password");
       }
+    );
 
-      // Save login response for later use
-      localStorage.setItem("user", JSON.stringify(data));
+    const text = await response.text();
 
-      // Go to dashboard
-      navigate("/");
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+    let data = {};
+
+    try {
+      data = text ? JSON.parse(text) : {};
+    } catch {
+      data = {};
     }
-  };
 
+    if (!response.ok) {
+      throw new Error(
+        data.message ||
+        text ||
+        "Invalid username or password"
+      );
+    }
+
+    // Save login response for later use
+    localStorage.setItem(
+      "user",
+      JSON.stringify(data)
+    );
+
+    // Go to dashboard
+    navigate("/");
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <div className="login-page">
       <div className="login-card">
