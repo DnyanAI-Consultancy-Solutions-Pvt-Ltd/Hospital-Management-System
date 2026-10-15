@@ -35,4 +35,8 @@ public interface AppointmentRepository
             Long doctorId,
             LocalDate appointmentDate,
             AppointmentStatus status);
+    int countByDoctorIdAndAppointmentDateAndStatusNot(
+            Long doctorId,
+            LocalDate appointmentDate,
+            AppointmentStatus status);
 }

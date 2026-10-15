@@ -23,15 +23,16 @@ public class AppointmentService {
     private final AppointmentRepository appointmentRepository;
     private final PatientRepository patientRepository;
     private final DoctorProfileRepository doctorProfileRepository;
-
+    private final SmsService smsService;
     public AppointmentService(
             AppointmentRepository appointmentRepository,
             PatientRepository patientRepository,
-            DoctorProfileRepository doctorProfileRepository) {
-
+            DoctorProfileRepository doctorProfileRepository,SmsService smsService) {
         this.appointmentRepository = appointmentRepository;
         this.patientRepository = patientRepository;
         this.doctorProfileRepository = doctorProfileRepository;
+    	this.smsService = smsService;
+
     }
 
 
@@ -102,6 +103,16 @@ public class AppointmentService {
         appointment.setReason(
                 request.getReason());
         appointment.setReferredBy(request.getReferredBy());
+        int existingAppointments =
+                appointmentRepository
+                    .countByDoctorIdAndAppointmentDateAndStatusNot(
+                        doctor.getId(),
+                        request.getAppointmentDate(),
+                        AppointmentStatus.CANCELLED
+                    );
+
+        int tokenNumber = existingAppointments + 1;
+        appointment.setTokenNumber(tokenNumber);
         // Default status
         appointment.setStatus(
                 AppointmentStatus.BOOKED);
@@ -111,7 +122,14 @@ public class AppointmentService {
         Appointment savedAppointment =
                 appointmentRepository.save(
                         appointment);
-
+        smsService.sendAppointmentSms(
+                patient.getMobileNumber(),
+                patient.getFullName(),
+                savedAppointment.getTokenNumber(),
+                doctor.getUser().getFullName(),
+                savedAppointment.getAppointmentDate().toString(),
+                savedAppointment.getAppointmentTime().toString()
+        );
 
         return convertToResponse(
                 savedAppointment);
@@ -277,7 +295,8 @@ public class AppointmentService {
         response.setStatus(
                 appointment.getStatus());
 
-
+        response.setTokenNumber(
+                appointment.getTokenNumber());
         return response;
     }
 }

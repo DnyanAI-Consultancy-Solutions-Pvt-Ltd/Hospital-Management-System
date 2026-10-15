@@ -23,12 +23,18 @@ public class AppointmentResponse {
     private LocalDate appointmentDate;
     private LocalTime appointmentTime;
     private String reason;
+    private Integer tokenNumber;
     private AppointmentStatus status;
+    
     private String referredBy;
 
     public AppointmentResponse() {
     }
-
+    public Integer getTokenNumber() {
+        return tokenNumber;
+    }public void setTokenNumber(Integer tokenNumber) {
+        this.tokenNumber = tokenNumber;
+    }
     public String getReferredBy() {
         return referredBy;
     }

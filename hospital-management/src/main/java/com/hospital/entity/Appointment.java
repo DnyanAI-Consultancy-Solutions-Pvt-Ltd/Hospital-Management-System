@@ -38,6 +38,9 @@ public class Appointment {
     
     @Column(length = 200)
     private String referredBy;
+ // Appointment Token Number
+    @Column(nullable = false)
+    private Integer tokenNumber;
  // Appointment Status
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -51,7 +54,13 @@ public class Appointment {
     }
     public Appointment() {
     }
+    public Integer getTokenNumber() {
+        return tokenNumber;
+    }
 
+    public void setTokenNumber(Integer tokenNumber) {
+        this.tokenNumber = tokenNumber;
+    }
     public Long getId() {
         return id;
     }
