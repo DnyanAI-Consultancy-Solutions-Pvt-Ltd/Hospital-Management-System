@@ -56,8 +56,22 @@ const handleLogin = async (e) => {
       JSON.stringify(data)
     );
 
-    // Go to dashboard
-    navigate("/");
+    // Get role from login response
+const role = String(
+  data.role ||
+  data.user?.role ||
+  data.userRole ||
+  ""
+).toUpperCase();
+
+if (role === "DOCTOR") {
+  navigate("/doctor-module", { replace: true });
+} else if (role === "ADMIN") {
+  navigate("/", { replace: true });
+} else {
+  setError("User role not found or not authorized.");
+  localStorage.removeItem("user");
+}
   } catch (err) {
     setError(err.message);
   } finally {
@@ -67,10 +81,9 @@ const handleLogin = async (e) => {
   return (
     <div className="login-page">
       <div className="login-card">
-
-        <div className="login-logo">
-          🏥
-        </div>
+<div className="login-logo">
+  <img src="/medinexa-logo.png" alt="MediNexa Logo" />
+</div>
 
         <h2>Hospital Management System</h2>
         <p>Login to continue</p>

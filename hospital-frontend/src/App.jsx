@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
-
+import DoctorModule from "./pages/DoctorModule";
 import MainLayout from "./layouts/MainLayout";
 import Dashboard from "./pages/Dashboard";
 import Patients from "./pages/Patients";
@@ -20,6 +20,22 @@ function ProtectedRoute({ children }) {
   return children;
 }
 
+function DoctorOnlyRoute({ children }) {
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+  const role = String(
+    user?.role || user?.user?.role || user?.userRole || ""
+  ).toUpperCase();
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (role !== "DOCTOR") {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+}
 function App() {
   return (
     <BrowserRouter>
@@ -36,7 +52,14 @@ function App() {
                   <Route path="/" element={<Dashboard />} />
 
                   <Route path="/patients" element={<PatientList />} />
-
+<Route
+  path="/doctor-module"
+  element={
+    <DoctorOnlyRoute>
+      <DoctorModule />
+    </DoctorOnlyRoute>
+  }
+/>
                   <Route
                     path="/patients/register"
                     element={<Patients />}
