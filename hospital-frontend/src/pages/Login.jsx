@@ -81,9 +81,10 @@ if (role === "DOCTOR") {
   return (
     <div className="login-page">
       <div className="login-card">
-<div className="login-logo">
-  <img src="/medinexa-logo.png" alt="MediNexa Logo" />
-</div>
+
+        <div className="login-logo">
+          🏥
+        </div>
 
         <h2>Hospital Management System</h2>
         <p>Login to continue</p>
