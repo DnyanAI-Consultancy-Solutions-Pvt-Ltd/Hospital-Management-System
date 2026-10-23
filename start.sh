@@ -1,6 +1,6 @@
 #!/bin/sh
 
-export SERVER_PORT=8080
+export SERVER_PORT=8081
 
 echo "Starting Spring Boot backend..."
 
