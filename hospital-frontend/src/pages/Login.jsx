@@ -1,4 +1,4 @@
-import companyLogo from "../assets/company-logo.png";
+import companyLogo from "../assets/company-logo.PNG";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API_BASE_URL from "../services/api";
