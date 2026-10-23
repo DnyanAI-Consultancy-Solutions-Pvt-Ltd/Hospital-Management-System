@@ -1,3 +1,4 @@
+
 package com.hospital.security;
 
 import java.util.List;
@@ -16,13 +17,14 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-@EnableMethodSecurity
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(
+            JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
@@ -32,49 +34,39 @@ public class SecurityConfig {
 
         http
             .csrf(csrf -> csrf.disable())
-
-            .cors(cors ->
-                cors.configurationSource(corsConfigurationSource())
-            )
-
-            .sessionManagement(session ->
-                session.sessionCreationPolicy(
-                    SessionCreationPolicy.STATELESS
-                )
-            )
-
+            .cors(cors -> cors.configurationSource(
+                    corsConfigurationSource()))
+            .sessionManagement(session -> session
+                    .sessionCreationPolicy(
+                            SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
 
-                // CORS preflight
-                .requestMatchers(
-                    HttpMethod.OPTIONS,
-                    "/**"
-                ).permitAll()
+                .requestMatchers(HttpMethod.OPTIONS, "/**")
+                    .permitAll()
 
-                // Login
                 .requestMatchers(
+                    HttpMethod.POST,
                     "/api/auth/login"
                 ).permitAll()
 
-                // Doctors
+                // Development testing only:
+                // Public signup; restrict roles on the server.
                 .requestMatchers(
-                    "/api/doctors/**"
-                ).authenticated()
+                    HttpMethod.POST,
+                    "/api/users"
+                ).permitAll()
 
-                // Appointments
-                .requestMatchers(
-                    "/api/appointments/**"
-                ).authenticated()
+                .requestMatchers("/api/doctors/**")
+                    .hasRole("DOCTOR")
 
-                // Patients
-                .requestMatchers(
-                    "/api/patients/**"
-                ).authenticated()
+                .requestMatchers("/api/appointments/**")
+                    .authenticated()
 
-                // All other APIs
+                .requestMatchers("/api/patients/**")
+                    .authenticated()
+
                 .anyRequest().authenticated()
             )
-
             .addFilterBefore(
                 jwtAuthenticationFilter,
                 UsernamePasswordAuthenticationFilter.class
@@ -82,36 +74,26 @@ public class SecurityConfig {
 
         return http.build();
     }
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOriginPatterns(
-            List.of(
-                "http://localhost:5173",
-                "https://*.hf.space",
-                "https://huggingface.co"
-            )
-        );
+        configuration.setAllowedOriginPatterns(List.of(
+            "http://localhost:5173",
+            "https://*.hf.space",
+            "https://huggingface.co"
+        ));
 
-        configuration.setAllowedMethods(
-            List.of(
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE",
-                "PATCH",
-                "OPTIONS"
-            )
-        );
+        configuration.setAllowedMethods(List.of(
+            "GET", "POST", "PUT", "DELETE",
+            "PATCH", "OPTIONS"
+        ));
 
-        configuration.setAllowedHeaders(
-            List.of(
-                "Authorization",
-                "Content-Type"
-            )
-        );
+        configuration.setAllowedHeaders(List.of(
+            "Authorization", "Content-Type"
+        ));
 
         configuration.setAllowCredentials(true);
 
@@ -122,6 +104,7 @@ public class SecurityConfig {
 
         return source;
     }
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

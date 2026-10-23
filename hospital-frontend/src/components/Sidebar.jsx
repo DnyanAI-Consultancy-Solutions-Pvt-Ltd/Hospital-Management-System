@@ -11,12 +11,13 @@ function Sidebar() {
   ).toUpperCase();
 
   const adminMenuItems = [
-    { label: "📊 Dashboard", path: "/" },
-    { label: "👤 Patient List", path: "/patients" },
-    { label: "➕ Patient Registration", path: "/patients/register" },
-    { label: "🩺 Doctors", path: "/doctors" },
-    { label: "📅 Appointments", path: "/appointments" },
-  ];
+  { label: "📊 Dashboard", path: "/" },
+  { label: "👤 Patient List", path: "/patients" },
+  { label: "➕ Patient Registration", path: "/patients/register" },
+  { label: "🩺 Doctors", path: "/doctors" },
+  { label: "📅 Appointments", path: "/appointments" },
+  { label: "🩺 Doctor Module", path: "/doctor-module" },
+];
 
   const doctorMenuItems = [
     { label: "🩺 Doctor Module", path: "/doctor-module" },

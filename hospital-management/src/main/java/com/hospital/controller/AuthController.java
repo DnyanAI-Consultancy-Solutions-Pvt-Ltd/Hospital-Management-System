@@ -30,6 +30,8 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(
             @RequestBody com.hospital.dto.LoginRequest request) {
+    	 System.out.println("Login request received");
+    	    System.out.println("Username received: [" + request.getUsername() + "]");
 
         User user = userRepository
                 .findByUsername(request.getUsername())
@@ -40,7 +42,24 @@ public class AuthController {
                     .badRequest()
                     .body("Username does not exist");
         }
+        System.out.println("User found. ID: " + user.getId());
+        System.out.println("Password supplied: "
+                + (request.getPassword() != null
+                && !request.getPassword().isBlank()));
 
+        System.out.println("Stored password hash exists: "
+                + (user.getPassword() != null
+                && !user.getPassword().isBlank()));
+
+        System.out.println("Stored hash length: "
+                + (user.getPassword() == null
+                ? 0 : user.getPassword().length()));
+        boolean passwordMatches = passwordEncoder.matches(
+                request.getPassword(),
+                user.getPassword()
+        );
+
+        System.out.println("Password matches: " + passwordMatches);
         if (!passwordEncoder.matches(
                 request.getPassword(),
                 user.getPassword())) {

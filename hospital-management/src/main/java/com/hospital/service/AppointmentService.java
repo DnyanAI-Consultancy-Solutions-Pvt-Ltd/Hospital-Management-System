@@ -23,15 +23,13 @@ public class AppointmentService {
     private final AppointmentRepository appointmentRepository;
     private final PatientRepository patientRepository;
     private final DoctorProfileRepository doctorProfileRepository;
-    private final SmsService smsService;
     public AppointmentService(
             AppointmentRepository appointmentRepository,
             PatientRepository patientRepository,
-            DoctorProfileRepository doctorProfileRepository,SmsService smsService) {
+            DoctorProfileRepository doctorProfileRepository) {
         this.appointmentRepository = appointmentRepository;
         this.patientRepository = patientRepository;
         this.doctorProfileRepository = doctorProfileRepository;
-    	this.smsService = smsService;
 
     }
 
@@ -122,15 +120,6 @@ public class AppointmentService {
         Appointment savedAppointment =
                 appointmentRepository.save(
                         appointment);
-        smsService.sendAppointmentSms(
-                patient.getMobileNumber(),
-                patient.getFullName(),
-                savedAppointment.getTokenNumber(),
-                doctor.getUser().getFullName(),
-                savedAppointment.getAppointmentDate().toString(),
-                savedAppointment.getAppointmentTime().toString()
-        );
-
         return convertToResponse(
                 savedAppointment);
     }

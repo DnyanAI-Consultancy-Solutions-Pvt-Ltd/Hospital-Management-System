@@ -1,3 +1,4 @@
+import companyLogo from "../assets/company-logo.png";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API_BASE_URL from "../services/api";
@@ -83,8 +84,12 @@ if (role === "DOCTOR") {
       <div className="login-card">
 
         <div className="login-logo">
-          🏥
-        </div>
+  <img
+    src={companyLogo}
+    alt="Company Logo"
+    className="company-logo"
+  />
+</div>
 
         <h2>Hospital Management System</h2>
         <p>Login to continue</p>

@@ -1724,4 +1724,23 @@ th {
   .doctor-profile-top {
     align-items: flex-start;
   }
+}.login-logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto 20px;
+}
+
+.company-logo {
+  width: 180px;
+  height: 120px;
+  object-fit: contain;
+  display: block;
+}
+.doctor-module-page {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
