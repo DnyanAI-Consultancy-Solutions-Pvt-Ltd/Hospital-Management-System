@@ -56,9 +56,15 @@ public class SecurityConfig {
                     "/api/users"
                 ).permitAll()
 
-                .requestMatchers("/api/doctors/**")
-                    .hasRole("DOCTOR")
+                .requestMatchers(
+                	    HttpMethod.GET,
+                	    "/api/doctors/available"
+                	).hasAnyRole("ADMIN", "RECEPTIONIST", "DOCTOR")
 
+                .requestMatchers("/api/doctors/**")
+                .hasAnyRole("ADMIN", "RECEPTIONIST", "DOCTOR")
+                    .requestMatchers("/api/dashboard/**")
+                    .hasAnyRole("ADMIN", "RECEPTIONIST")
                 .requestMatchers("/api/appointments/**")
                     .authenticated()
 

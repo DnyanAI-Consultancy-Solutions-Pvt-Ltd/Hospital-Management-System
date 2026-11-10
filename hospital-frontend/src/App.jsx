@@ -17,7 +17,9 @@ import Signup from "./pages/Signup";
 import Doctors from "./pages/Doctors";
 import Appointments from "./pages/Appointments";
 import DoctorDetails from "./pages/DoctorDetails";
-
+import Profile from "./pages/Profile";
+import Users from "./pages/Users";
+import Settings from "./pages/Settings";
 function getUser() {
   try {
     return JSON.parse(localStorage.getItem("user") || "null");
@@ -41,21 +43,20 @@ function ProtectedRoute({ children }) {
 
   return children;
 }
-
 function AdminOnlyRoute({ children }) {
   const user = getUser();
+  const role = getRole(user);
 
   if (!user) {
     return <Navigate to="/login" replace />;
   }
 
-  if (getRole(user) !== "ADMIN") {
+  if (role !== "ADMIN" && role !== "RECEPTIONIST") {
     return <Navigate to="/doctor-module" replace />;
   }
 
   return children;
 }
-
 function DoctorModuleRoute({ children }) {
   const user = getUser();
   const role = getRole(user);
@@ -87,6 +88,9 @@ function App() {
     </DoctorModuleRoute>
   }
 />
+<Route path="/profile" element={<Profile />} />
+<Route path="/users" element={<Users />} />
+<Route path="/settings" element={<Settings />} />
         {/* Admin pages inside MainLayout */}
         <Route
           path="/"

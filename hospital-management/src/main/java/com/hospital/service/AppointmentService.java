@@ -1,5 +1,6 @@
 package com.hospital.service;
-
+import com.hospital.entity.Role;
+import com.hospital.service.NotificationService;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -16,53 +17,44 @@ import com.hospital.entity.Patient;
 import com.hospital.repository.AppointmentRepository;
 import com.hospital.repository.DoctorProfileRepository;
 import com.hospital.repository.PatientRepository;
-
 @Service
 public class AppointmentService {
-
     private final AppointmentRepository appointmentRepository;
     private final PatientRepository patientRepository;
     private final DoctorProfileRepository doctorProfileRepository;
+    private final NotificationService notificationService;
     public AppointmentService(
             AppointmentRepository appointmentRepository,
             PatientRepository patientRepository,
-            DoctorProfileRepository doctorProfileRepository) {
+            DoctorProfileRepository doctorProfileRepository,
+            NotificationService notificationService) {
+
         this.appointmentRepository = appointmentRepository;
         this.patientRepository = patientRepository;
         this.doctorProfileRepository = doctorProfileRepository;
-
+        this.notificationService = notificationService;
     }
-
-
     // Create Appointment
     @Transactional
     public AppointmentResponse createAppointment(
             AppointmentRequest request) {
-
         // Find Patient
         Patient patient = patientRepository
                 .findById(request.getPatientId())
                 .orElseThrow(() ->
                         new RuntimeException(
                                 "Patient not found"));
-
-
         // Find Doctor
         DoctorProfile doctor = doctorProfileRepository
                 .findById(request.getDoctorId())
                 .orElseThrow(() ->
                         new RuntimeException(
                                 "Doctor not found"));
-
-
         // Check Doctor Availability
         if (!doctor.isAvailable()) {
-
             throw new RuntimeException(
                     "Doctor is currently not available");
         }
-
-
         // Check duplicate appointment
         List<Appointment> doctorAppointments =
                 appointmentRepository
@@ -70,7 +62,6 @@ public class AppointmentService {
                             doctor.getId(),
                             request.getAppointmentDate()
                     );
-
         boolean alreadyBooked =
                 doctorAppointments.stream()
                     .anyMatch(appointment ->
@@ -86,12 +77,9 @@ public class AppointmentService {
             throw new RuntimeException(
                     "Doctor already has an appointment at this date and time");
         }
-
-
         // Create Appointment
         Appointment appointment =
                 new Appointment();
-
         appointment.setPatient(patient);
         appointment.setDoctor(doctor);
         appointment.setAppointmentDate(
@@ -112,19 +100,56 @@ public class AppointmentService {
         int tokenNumber = existingAppointments + 1;
         appointment.setTokenNumber(tokenNumber);
         // Default status
+        appointment.setEmergency(request.isEmergency());
+        
         appointment.setStatus(
                 AppointmentStatus.BOOKED);
-
-
+        
         // Save
         Appointment savedAppointment =
                 appointmentRepository.save(
                         appointment);
+
+String patientName = patient.getFullName();
+String doctorName = doctor.getUser().getFullName();
+
+String appointmentMessage =
+        "Appointment booked for " + patientName
+        + " with Dr. " + doctorName
+        + " on " + request.getAppointmentDate()
+        + " at " + request.getAppointmentTime() + ".";
+
+// Notify ADMIN
+notificationService.notifyRole(
+        Role.ADMIN,
+        "New Appointment Booked",
+        appointmentMessage,
+        "APPOINTMENT",
+        "/appointments"
+);
+
+// Notify RECEPTIONIST
+notificationService.notifyRole(
+        Role.RECEPTIONIST,
+        "New Appointment Booked",
+        appointmentMessage,
+        "APPOINTMENT",
+        "/appointments"
+);
+
+// Notify assigned DOCTOR only
+notificationService.createNotification(
+        doctor.getUser().getId(),
+        "New Appointment Assigned",
+        appointmentMessage,
+        "APPOINTMENT",
+        "/doctor-module"
+);
+
+       
         return convertToResponse(
                 savedAppointment);
     }
-
-
     // Get All Appointments
     public List<AppointmentResponse> getAllAppointments() {
 
@@ -133,19 +158,14 @@ public class AppointmentService {
                 .map(this::convertToResponse)
                 .toList();
     }
-
-
     // Get Appointments by Doctor
     public List<AppointmentResponse> getAppointmentsByDoctor(
             Long doctorId) {
-
         // Verify doctor exists
         if (!doctorProfileRepository.existsById(doctorId)) {
-
             throw new RuntimeException(
                     "Doctor not found");
         }
-
         return appointmentRepository
                 .findByDoctorId(doctorId)
                 .stream()
@@ -208,28 +228,93 @@ public class AppointmentService {
 
 
     // Update Appointment Status
-    @Transactional
-    public AppointmentResponse updateStatus(
-            Long appointmentId,
-            AppointmentStatus status) {
 
-        Appointment appointment =
-                appointmentRepository
-                    .findById(appointmentId)
-                    .orElseThrow(() ->
-                        new RuntimeException(
-                                "Appointment not found"));
+@Transactional
+public AppointmentResponse updateStatus(
+        Long appointmentId,
+        AppointmentStatus status) {
 
-        appointment.setStatus(status);
+    Appointment appointment = appointmentRepository
+            .findById(appointmentId)
+            .orElseThrow(() ->
+                    new RuntimeException("Appointment not found"));
 
-        Appointment updatedAppointment =
-                appointmentRepository.save(
-                        appointment);
+    AppointmentStatus oldStatus = appointment.getStatus();
 
-        return convertToResponse(
-                updatedAppointment);
+    // No notification if status has not changed
+    if (oldStatus == status) {
+        return convertToResponse(appointment);
     }
 
+    appointment.setStatus(status);
+
+    Appointment updatedAppointment =
+            appointmentRepository.save(appointment);
+
+    Patient patient = updatedAppointment.getPatient();
+    DoctorProfile doctor = updatedAppointment.getDoctor();
+
+    String title;
+    String message;
+
+    switch (status) {
+        case CANCELLED:
+            title = "Appointment Cancelled";
+            message = "Appointment for " + patient.getFullName()
+                    + " with Dr. " + doctor.getUser().getFullName()
+                    + " has been cancelled.";
+            break;
+
+        case COMPLETED:
+            title = "Appointment Completed";
+            message = "Appointment for " + patient.getFullName()
+                    + " with Dr. " + doctor.getUser().getFullName()
+                    + " has been completed.";
+            break;
+
+        case BOOKED:
+            title = "Appointment Confirmed";
+            message = "Appointment for " + patient.getFullName()
+                    + " with Dr. " + doctor.getUser().getFullName()
+                    + " is confirmed.";
+            break;
+
+        default:
+            title = "Appointment Status Updated";
+            message = "Appointment for " + patient.getFullName()
+                    + " status changed from " + oldStatus
+                    + " to " + status + ".";
+    }
+
+    // Notify ADMIN
+    notificationService.notifyRole(
+            Role.ADMIN,
+            title,
+            message,
+            "APPOINTMENT",
+            "/appointments"
+    );
+
+    // Notify RECEPTIONIST
+    notificationService.notifyRole(
+            Role.RECEPTIONIST,
+            title,
+            message,
+            "APPOINTMENT",
+            "/appointments"
+    );
+
+    // Notify assigned DOCTOR
+    notificationService.createNotification(
+            doctor.getUser().getId(),
+            title,
+            message,
+            "APPOINTMENT",
+            "/doctor-module"
+    );
+
+    return convertToResponse(updatedAppointment);
+}
 
     // Convert Entity → Response DTO
     private AppointmentResponse convertToResponse(
@@ -237,7 +322,7 @@ public class AppointmentService {
 
         AppointmentResponse response =
                 new AppointmentResponse();
-
+        
         Patient patient =
                 appointment.getPatient();
 

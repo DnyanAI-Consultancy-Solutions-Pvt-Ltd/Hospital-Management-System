@@ -42,33 +42,21 @@ public class AuthController {
                     .badRequest()
                     .body("Username does not exist");
         }
-        System.out.println("User found. ID: " + user.getId());
-        System.out.println("Password supplied: "
-                + (request.getPassword() != null
-                && !request.getPassword().isBlank()));
-
-        System.out.println("Stored password hash exists: "
-                + (user.getPassword() != null
-                && !user.getPassword().isBlank()));
-
-        System.out.println("Stored hash length: "
-                + (user.getPassword() == null
-                ? 0 : user.getPassword().length()));
+        if (!user.isActive()) {
+            return ResponseEntity
+                    .status(403)
+                    .body("Your account is deactivated. Please contact administrator.");
+        }
         boolean passwordMatches = passwordEncoder.matches(
                 request.getPassword(),
                 user.getPassword()
         );
 
-        System.out.println("Password matches: " + passwordMatches);
-        if (!passwordEncoder.matches(
-                request.getPassword(),
-                user.getPassword())) {
-
+        if (!passwordMatches) {
             return ResponseEntity
                     .badRequest()
                     .body("Invalid password");
         }
-
         // Generate JWT token
         String token = jwtService.generateToken(user);
 

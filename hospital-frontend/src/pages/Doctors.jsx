@@ -253,18 +253,39 @@ function Doctors() {
 
           </button>
 
-
-          <button
-            className="save-btn"
-            onClick={loadDoctors}
-            style={{ marginLeft: "10px" }}
-          >
-
-            ↻ Refresh
-
-          </button>
-
-        </div>
+</div>
+<div
+  style={{
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    gap: "10px"
+  }}
+>
+         <button
+  type="button"
+  onClick={loadDoctors}
+  title="Refresh Doctors"
+  disabled={loading}
+  style={{
+    width: "34px",
+    height: "34px",
+    minWidth: "34px",
+    padding: "0",
+    border: "1px solid #dbeafe",
+    borderRadius: "50%",
+    background: "#ffffff",
+    color: "#2563eb",
+    fontSize: "20px",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center"
+  }}
+>
+  ↻
+</button>
+      </div>  
 
       </div>
 

@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import API_BASE_URL from "../services/api";
 
 function Signup() {
-
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const fromUsers = location.state?.fromUsers === true;
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -33,11 +35,15 @@ function Signup() {
     setLoading(true);
 
     try {
+      const token = localStorage.getItem("token");
 
       const response = await fetch(`${API_BASE_URL}/api/users`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          ...(fromUsers && token
+            ? { Authorization: `Bearer ${token}` }
+            : {})
         },
         body: JSON.stringify(formData)
       });
@@ -46,7 +52,7 @@ function Signup() {
 
       if (!response.ok) {
         throw new Error(
-          data?.message || "Signup failed"
+          data?.message || "Account creation failed"
         );
       }
 
@@ -61,8 +67,12 @@ function Signup() {
       });
 
       setTimeout(() => {
-        navigate("/login");
-      }, 1500);
+        if (fromUsers) {
+          navigate("/users", { replace: true });
+        } else {
+          navigate("/login");
+        }
+      }, 1200);
 
     } catch (err) {
       setError(err.message);
@@ -73,8 +83,16 @@ function Signup() {
 
   return (
     <div className="login-page">
-
-      <div className="login-card">
+<div className="login-card signup-card">
+        {fromUsers && (
+          <button
+            type="button"
+            className="signup-back-btn"
+            onClick={() => navigate("/users", { replace: true })}
+          >
+            ← Back to Users
+          </button>
+        )}
 
         <div className="login-logo">
           🏥
@@ -100,7 +118,6 @@ function Signup() {
 
           <div className="form-group">
             <label>Full Name</label>
-
             <input
               type="text"
               name="fullName"
@@ -113,7 +130,6 @@ function Signup() {
 
           <div className="form-group">
             <label>Username</label>
-
             <input
               type="text"
               name="username"
@@ -126,7 +142,6 @@ function Signup() {
 
           <div className="form-group">
             <label>Email</label>
-
             <input
               type="email"
               name="email"
@@ -139,7 +154,6 @@ function Signup() {
 
           <div className="form-group">
             <label>Password</label>
-
             <input
               type="password"
               name="password"
@@ -152,41 +166,19 @@ function Signup() {
 
           <div className="form-group">
             <label>Role</label>
-
             <select
               name="role"
               value={formData.role}
               onChange={handleChange}
               required
             >
-              <option value="">
-                Select Role
-              </option>
-
-              <option value="DOCTOR">
-                Doctor
-              </option>
-
-              <option value="RECEPTIONIST">
-                Receptionist
-              </option>
-
-              <option value="NURSE">
-                Nurse
-              </option>
-
-              <option value="LAB_TECHNICIAN">
-                Lab Technician
-              </option>
-
-              <option value="PHARMACIST">
-                Pharmacist
-              </option>
-
-              <option value="ACCOUNTANT">
-                Accountant
-              </option>
-
+              <option value="">Select Role</option>
+              <option value="DOCTOR">Doctor</option>
+              <option value="RECEPTIONIST">Receptionist</option>
+              <option value="NURSE">Nurse</option>
+              <option value="LAB_TECHNICIAN">Lab Technician</option>
+              <option value="PHARMACIST">Pharmacist</option>
+              <option value="ACCOUNTANT">Accountant</option>
             </select>
           </div>
 
@@ -200,18 +192,19 @@ function Signup() {
 
         </form>
 
-        <div style={{ marginTop: "15px" }}>
-          <button
-            type="button"
-            onClick={() => navigate("/login")}
-            className="link-btn"
-          >
-            Already have an account? Login
-          </button>
-        </div>
+        {!fromUsers && (
+          <div style={{ marginTop: "15px" }}>
+            <button
+              type="button"
+              onClick={() => navigate("/login")}
+              className="link-btn"
+            >
+              Already have an account? Login
+            </button>
+          </div>
+        )}
 
       </div>
-
     </div>
   );
 }

@@ -10,7 +10,7 @@ import com.hospital.dto.UserResponse;
 import com.hospital.entity.Role;
 import com.hospital.entity.User;
 import com.hospital.repository.UserRepository;
-
+import com.hospital.dto.ChangePasswordRequest;
 @Service
 public class UserService {
 
@@ -57,4 +57,60 @@ public class UserService {
                 .map(UserResponse::new)
                 .toList();
     }
+    public List<UserResponse> getAllUsers() {
+        return userRepository.findAllByOrderByIdDesc()
+                .stream()
+                .map(UserResponse::new)
+                .toList();
+    }
+
+    public UserResponse updateUserStatus(Long id, boolean active, String currentUsername) {
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (user.getUsername().equals(currentUsername) && !active) {
+            throw new RuntimeException("You cannot deactivate your own account");
+        }
+
+        user.setActive(active);
+
+        User savedUser = userRepository.save(user);
+
+        return new UserResponse(savedUser);
+    }
+
+public void changePassword(
+        String username,
+        ChangePasswordRequest request) {
+
+    User user = userRepository.findByUsername(username)
+            .orElseThrow(() ->
+                new RuntimeException("User not found"));
+
+    // Verify old password
+    if (!passwordEncoder.matches(
+            request.getOldPassword(),
+            user.getPassword())) {
+
+        throw new RuntimeException("Old password is incorrect");
+    }
+
+    // Prevent using the same password again
+    if (passwordEncoder.matches(
+            request.getNewPassword(),
+            user.getPassword())) {
+
+        throw new RuntimeException(
+            "New password must be different from old password");
+    }
+
+    // Encode and save new password
+    user.setPassword(
+        passwordEncoder.encode(request.getNewPassword())
+    );
+
+    userRepository.save(user);
+}
+
 }

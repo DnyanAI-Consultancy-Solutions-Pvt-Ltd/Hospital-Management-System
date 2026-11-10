@@ -1,4 +1,5 @@
-# Node
+
+# Node / React
 node_modules/
 hospital-frontend/node_modules/
 hospital-frontend/dist/
@@ -11,10 +12,15 @@ hospital-management/target/
 .settings/
 .classpath
 .project
+.idea/
+.vscode/
 
-# Environment / secrets
+# Environment / Secrets
 .env
+.env.*
 *.env
+application-local.properties
+application-local.yml
 
 # Logs
 *.log

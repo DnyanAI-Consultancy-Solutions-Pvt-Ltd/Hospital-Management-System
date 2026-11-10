@@ -1,5 +1,5 @@
 package com.hospital.service;
-
+import com.hospital.entity.Role;
 import java.time.Year;
 import java.util.List;
 
@@ -17,34 +17,59 @@ import org.springframework.data.domain.Sort;
 public class PatientService {
 
     private final PatientRepository patientRepository;
+    private final NotificationService notificationService;
+    public PatientService(
+            PatientRepository patientRepository,
+            NotificationService notificationService) {
 
-    public PatientService(PatientRepository patientRepository) {
         this.patientRepository = patientRepository;
+        this.notificationService = notificationService;
     }
-
     // Register Patient
-    public PatientResponse createPatient(PatientRequest request) {
 
-        if (patientRepository.existsByMobileNumber(request.getMobileNumber())) {
-            throw new RuntimeException("Patient with this mobile number already exists");
-        }
+public PatientResponse createPatient(PatientRequest request) {
 
-        Patient patient = new Patient();
-
-        patient.setRegistrationNumber(generateRegistrationNumber());
-        patient.setFullName(request.getFullName());
-        patient.setDateOfBirth(request.getDateOfBirth());
-        patient.setGender(request.getGender());
-        patient.setBloodGroup(request.getBloodGroup());
-        patient.setMobileNumber(request.getMobileNumber());
-        patient.setEmail(request.getEmail());
-        patient.setAddress(request.getAddress());
-        patient.setEmergencyContact(request.getEmergencyContact());
-
-        Patient savedPatient = patientRepository.save(patient);
-
-        return new PatientResponse(savedPatient);
+    if (patientRepository.existsByMobileNumber(request.getMobileNumber())) {
+        throw new RuntimeException(
+                "Patient with this mobile number already exists");
     }
+
+    Patient patient = new Patient();
+
+    patient.setRegistrationNumber(generateRegistrationNumber());
+    patient.setFullName(request.getFullName());
+    patient.setDateOfBirth(request.getDateOfBirth());
+    patient.setGender(request.getGender());
+    patient.setBloodGroup(request.getBloodGroup());
+    patient.setMobileNumber(request.getMobileNumber());
+    patient.setEmail(request.getEmail());
+    patient.setAddress(request.getAddress());
+    patient.setEmergencyContact(request.getEmergencyContact());
+
+    Patient savedPatient = patientRepository.save(patient);
+
+    // Notify ADMIN
+    notificationService.notifyRole(
+            Role.ADMIN,
+            "New Patient Registered",
+            savedPatient.getFullName()
+                    + " has been successfully registered.",
+            "PATIENT",
+            "/patients"
+    );
+
+    // Notify RECEPTIONIST
+    notificationService.notifyRole(
+            Role.RECEPTIONIST,
+            "New Patient Registered",
+            savedPatient.getFullName()
+                    + " has been successfully registered.",
+            "PATIENT",
+            "/patients"
+    );
+
+    return new PatientResponse(savedPatient);
+}
 
     // Get All Patients
     public List<PatientResponse> getAllPatients() {

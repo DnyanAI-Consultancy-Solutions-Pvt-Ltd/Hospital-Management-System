@@ -39,4 +39,8 @@ public interface AppointmentRepository
             Long doctorId,
             LocalDate appointmentDate,
             AppointmentStatus status);
+    List<Appointment> findByAppointmentDateOrderByAppointmentTimeAsc(
+            LocalDate appointmentDate);
+    long countByEmergencyTrue();
 }
+

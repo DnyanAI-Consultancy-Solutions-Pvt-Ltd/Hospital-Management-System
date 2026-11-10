@@ -1,6 +1,6 @@
 import { useState } from "react";
 import API_BASE_URL from "../services/api";
-
+import Swal from "sweetalert2";
 function Patients() {
 
   const [formData, setFormData] = useState({
@@ -82,62 +82,92 @@ function Patients() {
     }
   };
 
-  const handleSubmit = async (e) => {
+ 
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    e.preventDefault();
+  setMessage("");
+  setError("");
 
-    setMessage("");
-    setError("");
+  try {
+    const user = JSON.parse(localStorage.getItem("user"));
 
-    try {
-
-      const user = JSON.parse(localStorage.getItem("user"));
-
-      if (!user || !user.token) {
-        throw new Error("Please login again");
-      }
-
-      const response = await fetch(
-        `${API_BASE_URL}/api/patients`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${user.token}`
-          },
-          body: JSON.stringify(formData)
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          data.message || "Patient registration failed"
-        );
-      }
-
-      setMessage(
-        `Patient registered successfully. Registration No: ${data.registrationNumber}`
-      );
-
-      setFormData({
-        fullName: "",
-        dateOfBirth: "",
-        gender: "",
-        bloodGroup: "",
-        mobileNumber: "",
-        email: "",
-        address: "",
-        emergencyContact: ""
-      });
-
-    } catch (err) {
-
-      setError(err.message);
-
+    if (!user || !user.token) {
+      throw new Error("Please login again");
     }
-  };
+
+    const response = await fetch(
+      `${API_BASE_URL}/api/patients`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${user.token}`
+        },
+        body: JSON.stringify(formData)
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.message || "Patient registration failed"
+      );
+    }
+
+    // Clear form
+    setFormData({
+      fullName: "",
+      dateOfBirth: "",
+      gender: "",
+      bloodGroup: "",
+      mobileNumber: "",
+      email: "",
+      address: "",
+      emergencyContact: ""
+    });
+
+    // Professional Success Popup
+    await Swal.fire({
+  icon: "success",
+  title: "Patient Registered Successfully!",
+  html: `
+    <p style="color:#64748b;font-size:14px;">
+      Patient details have been saved successfully.
+    </p>
+    <p style="font-weight:600;color:#1e293b;">
+      Registration Number
+    </p>
+    <div id="registration-number"
+      style="background:#f1f5f9;padding:8px;
+      border-radius:6px;font-size:18px;
+      font-weight:600;color:#2563eb;">
+    </div>
+  `,
+  didOpen: () => {
+    document.getElementById("registration-number").textContent =
+      data.registrationNumber || "Generated Successfully";
+  },
+  confirmButtonText: "Done",
+  confirmButtonColor: "#2563eb",
+  allowOutsideClick: false
+});
+    
+
+  } catch (err) {
+    setError(err.message);
+
+    await Swal.fire({
+      icon: "error",
+      title: "Registration Failed",
+      text: err.message,
+      confirmButtonText: "Try Again",
+      confirmButtonColor: "#dc2626"
+    });
+  }
+};
+
 
   const handleClear = () => {
 
@@ -169,18 +199,7 @@ function Patients() {
         </div>
       </div>
 
-      {message && (
-        <div className="success-message">
-          ✓ {message}
-        </div>
-      )}
-
-      {error && (
-        <div className="error-message">
-          ✕ {error}
-        </div>
-      )}
-
+     
       {/* =========================================
           RETURNING PATIENT SEARCH
       ========================================= */}

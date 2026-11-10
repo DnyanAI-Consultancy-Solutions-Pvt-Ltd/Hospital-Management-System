@@ -56,19 +56,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         .findByUsername(username)
                         .orElse(null);
 
-                if (user != null) {
+                if (user != null && user.isActive())  {
 
                     String role = user.getRole().name();
 
                     UsernamePasswordAuthenticationToken authentication =
-                            new UsernamePasswordAuthenticationToken(
-                                    user,
-                                    null,
-                                    java.util.List.of(
-                                            new SimpleGrantedAuthority(
-                                                    "ROLE_" + role
-                                            )
-                                    )
+                    		new UsernamePasswordAuthenticationToken(
+                    			    username,
+                    			    null,
+                    			    java.util.List.of(
+                    			        new SimpleGrantedAuthority("ROLE_" + role)
+                    			    )
+                    			
                             );
 
                     SecurityContextHolder

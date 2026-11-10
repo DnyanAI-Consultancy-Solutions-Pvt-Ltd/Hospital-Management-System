@@ -10,6 +10,7 @@ public class UserResponse {
     private String username;
     private String email;
     private Role role;
+    private boolean active;
 
     public UserResponse(User user) {
         this.id = user.getId();
@@ -17,6 +18,7 @@ public class UserResponse {
         this.username = user.getUsername();
         this.email = user.getEmail();
         this.role = user.getRole();
+        this.active = user.isActive();
     }
 
     public Long getId() {
@@ -37,5 +39,9 @@ public class UserResponse {
 
     public Role getRole() {
         return role;
+    }
+
+    public boolean isActive() {
+        return active;
     }
 }

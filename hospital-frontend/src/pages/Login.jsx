@@ -51,28 +51,54 @@ const handleLogin = async (e) => {
       );
     }
 
-    // Save login response for later use
+    // Read role and token from common login response formats
+    const userData = data.user || data.data?.user || data.data || data;
+
+    const role = String(
+      data.role ||
+      data.user?.role ||
+      data.data?.role ||
+      data.data?.user?.role ||
+      data.userRole ||
+      userData.role ||
+      ""
+    ).trim().toUpperCase().replace(/^ROLE_/, "");
+
+    const token =
+      data.token ||
+      data.jwtToken ||
+      data.accessToken ||
+      data.data?.token ||
+      data.data?.jwtToken ||
+      data.data?.accessToken;
+
+    if (!["ADMIN", "DOCTOR", "RECEPTIONIST"].includes(role)) {
+      setError("User role not found or not authorized.");
+      return;
+    }
+
+    // Save normalized user details
     localStorage.setItem(
       "user",
-      JSON.stringify(data)
+      JSON.stringify({
+        ...userData,
+        role,
+        username: userData.username || username,
+        fullName: userData.fullName || userData.name || username
+      })
     );
 
-    // Get role from login response
-const role = String(
-  data.role ||
-  data.user?.role ||
-  data.userRole ||
-  ""
-).toUpperCase();
+    if (token) {
+      localStorage.setItem("token", token);
+    }
 
-if (role === "DOCTOR") {
-  navigate("/doctor-module", { replace: true });
-} else if (role === "ADMIN") {
-  navigate("/", { replace: true });
-} else {
-  setError("User role not found or not authorized.");
-  localStorage.removeItem("user");
-}
+    if (role === "DOCTOR") {
+      navigate("/doctor-module", { replace: true });
+    } else {
+      // Admin and Receptionist both open the dashboard
+      navigate("/", { replace: true });
+    }
+
   } catch (err) {
     setError(err.message);
   } finally {

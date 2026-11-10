@@ -35,7 +35,9 @@ public class Appointment {
     @Column(length = 500)
     private String reason;
 
-    
+ // Detailed Description
+    @Column(length = 1000)
+    private String description;
     @Column(length = 200)
     private String referredBy;
  // Appointment Token Number
@@ -45,6 +47,22 @@ public class Appointment {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private AppointmentStatus status = AppointmentStatus.BOOKED;
+    @Column(nullable = false)
+    private boolean emergency = false;
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+    public boolean isEmergency() {
+        return emergency;
+    }
+
+    public void setEmergency(boolean emergency) {
+        this.emergency = emergency;
+    }
     public String getReferredBy() {
         return referredBy;
     }

@@ -37,7 +37,16 @@ public class Patient {
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
+    @Column(nullable = false)
+    private boolean emergency = false;
 
+    public boolean isEmergency() {
+        return emergency;
+    }
+
+    public void setEmergency(boolean emergency) {
+        this.emergency = emergency;
+    }
     public Patient() {
     }
 
