@@ -555,9 +555,10 @@ function Doctors() {
 
             <div className="patient-card">
 
-              <p>
-                Loading doctors...
-              </p>
+             <div className="dashboard-loading">
+  <span className="dashboard-loader"></span>
+  <span>Loading Doctors...</span>
+</div>
 
             </div>
 

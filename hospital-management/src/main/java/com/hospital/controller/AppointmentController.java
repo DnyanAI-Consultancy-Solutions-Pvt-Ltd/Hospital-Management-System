@@ -82,7 +82,15 @@ public class AppointmentController {
                         .getAppointmentsByDoctor(doctorId)
         );
     }
+    @PatchMapping("/{appointmentId}/check-in")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPTIONIST')")
+    public ResponseEntity<AppointmentResponse> checkIn(
+            @PathVariable Long appointmentId) {
 
+        return ResponseEntity.ok(
+                appointmentService.checkIn(appointmentId)
+        );
+    }
 
     // ==========================================
     // Get Appointments by Patient

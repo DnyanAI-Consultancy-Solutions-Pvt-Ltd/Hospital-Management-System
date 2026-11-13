@@ -495,9 +495,10 @@ if (!user || !user.token) {
 
         {loading ? (
 
-          <div className="table-message">
-            Loading patients...
-          </div>
+         <div className="dashboard-loading">
+  <span className="dashboard-loader"></span>
+  <span>Loading patients...</span>
+</div>
 
         ) : filteredPatients.length === 0 ? (
 

@@ -41,6 +41,7 @@ useEffect(() => {
     };
 
     try {
+      setLoading(true);
       setError("");
 
       const [statsResponse, appointmentsResponse, patientsResponse] =
@@ -51,21 +52,15 @@ useEffect(() => {
         ]);
 
       if (!statsResponse.ok) {
-        throw new Error(
-          `Dashboard stats failed with status ${statsResponse.status}`
-        );
+        throw new Error(`Dashboard stats failed: ${statsResponse.status}`);
       }
 
       if (!appointmentsResponse.ok) {
-        throw new Error(
-          `Today's appointments failed with status ${appointmentsResponse.status}`
-        );
+        throw new Error(`Today's appointments failed: ${appointmentsResponse.status}`);
       }
 
       if (!patientsResponse.ok) {
-        throw new Error(
-          `Recent patients failed with status ${patientsResponse.status}`
-        );
+        throw new Error(`Recent patients failed: ${patientsResponse.status}`);
       }
 
       const [statsData, appointmentsData, patientsData] =
@@ -77,12 +72,12 @@ useEffect(() => {
 
       if (!active) return;
 
-     setStats({
-  totalPatients: statsData.totalPatients ?? 0,
-  totalDoctors: statsData.totalDoctors ?? 0,
-  emergencyAppointments: statsData.emergencyAppointments ?? 0,
-  availableBeds: statsData.availableBeds ?? null,
-});
+      setStats({
+        totalPatients: statsData.totalPatients ?? 0,
+        totalDoctors: statsData.totalDoctors ?? 0,
+        emergencyAppointments: statsData.emergencyAppointments ?? 0,
+        availableBeds: statsData.availableBeds ?? null,
+      });
 
       setTodayAppointments(
         Array.isArray(appointmentsData) ? appointmentsData : []
@@ -91,6 +86,7 @@ useEffect(() => {
       setRecentPatients(
         Array.isArray(patientsData) ? patientsData : []
       );
+
     } catch (err) {
       if (active) {
         setError(err.message || "Unable to load dashboard");
@@ -102,11 +98,8 @@ useEffect(() => {
 
   loadDashboard();
 
-  const intervalId = setInterval(loadDashboard, 30000);
-
   return () => {
     active = false;
-    clearInterval(intervalId);
   };
 }, []);
 
@@ -208,7 +201,7 @@ useEffect(() => {
   <div className="stat-icon">👤</div>
   <div>
     <span>Total Patients</span>
-    <h3>{loading ? "..." : stats.totalPatients}</h3>
+    <h3>{loading ? <span className="dashboard-loader"></span> : stats.totalPatients}</h3>
   </div>
 </div>
 
@@ -229,14 +222,14 @@ useEffect(() => {
   <div className="stat-icon">🩺</div>
   <div>
     <span>Total Doctors</span>
-    <h3>{loading ? "..." : stats.totalDoctors}</h3>
+    <h3>{loading ? <span className="dashboard-loader"></span> : stats.totalDoctors}</h3>
   </div>
 </div>
 
 
       <div
   className="stat-card clickable-card"
-onClick={() => navigate("/appointments?emergency=true")}
+  onClick={() => navigate("/appointments?emergency=true")}
   role="button"
   tabIndex={0}
   onKeyDown={(e) => {
@@ -258,7 +251,7 @@ onClick={() => navigate("/appointments?emergency=true")}
             <span>Available Beds</span>
             <h3>
               {loading
-                ? "..."
+                ?  <span className="dashboard-loader"></span> 
                 : stats.availableBeds === null
                 ? "0"
                 : stats.availableBeds}
@@ -277,7 +270,10 @@ onClick={() => navigate("/appointments?emergency=true")}
           </div>
 
           {loading ? (
-            <p>Loading patients...</p>
+           <div className="dashboard-loading">
+  <span className="dashboard-loader"></span>
+  <span>Loading patients...</span>
+</div>
           ) : recentPatients.length === 0 ? (
             <p>No recent patients available.</p>
           ) : (
@@ -320,7 +316,10 @@ onClick={() => navigate("/appointments?emergency=true")}
           </div>
 
           {loading ? (
-            <p>Loading appointments...</p>
+           <div className="dashboard-loading">
+  <span className="dashboard-loader"></span>
+  <span>Loading appointments...</span>
+</div>
           ) : todayAppointments.length === 0 ? (
             <p>No appointments scheduled for today.</p>
           ) : (

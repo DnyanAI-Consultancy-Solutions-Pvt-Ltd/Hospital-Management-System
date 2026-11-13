@@ -521,7 +521,8 @@ patientId: Number(patientId),
     switch (status) {
       case "BOOKED":
         return "status-booked";
-
+case "CHECKED_IN":
+  return "status-checked-in";
       case "WAITING":
         return "status-waiting";
 
@@ -538,7 +539,43 @@ patientId: Number(patientId),
         return "";
     }
   };
+const handleCheckIn = async (appointmentId) => {
+  try {
+    const token = localStorage.getItem("token");
 
+    const response = await fetch(
+      `${API_BASE_URL}/api/appointments/${appointmentId}/check-in`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    if (!response.ok) {
+      const message = await response.text();
+      throw new Error(message || "Check-In failed");
+    }
+
+    await loadAppointments();
+
+    Swal.fire({
+      icon: "success",
+      title: "Patient Checked In!",
+      text: "Patient check-in completed successfully.",
+      timer: 1800,
+      showConfirmButton: false
+    });
+
+  } catch (error) {
+    Swal.fire({
+      icon: "error",
+      title: "Check-In Failed",
+      text: error.message
+    });
+  }
+};
   // ==========================
   // Today's Date
   // ==========================
@@ -851,16 +888,6 @@ patientId: Number(patientId),
       />
     </div>
 
-    <div style={{ gridColumn: "1 / -1" }}>
-      <button
-        type="button"
-        className="save-btn"
-        onClick={handleRegisterPatient}
-        disabled={saving}
-      >
-        {saving ? "Registering..." : "Register Patient & Continue"}
-      </button>
-    </div>
   </div>
 
                 {/* No Patient Found */}
@@ -1108,9 +1135,10 @@ patientId: Number(patientId),
 
         {loading ? (
 
-          <p>
-            Loading appointments...
-          </p>
+       <div className="dashboard-loading">
+  <span className="dashboard-loader"></span>
+  <span>Loading appointments...</span>
+</div>
 
 ) : filteredAppointments.length === 0 ? (
           <p>
@@ -1217,36 +1245,24 @@ patientId: Number(patientId),
 <td>{appointment.referredBy || "-"}</td>
                       <td>
 
-                        <span
-                          className={getStatusClass(
-                            appointment.status
-                          )}
-                        >
-                          {
-                            appointment.status
-                          }
-                        </span>
+                       <span className={getStatusClass(appointment.status)}>
+  {appointment.status === "CHECKED_IN"
+    ? "✓ Checked In"
+    : appointment.status}
+</span>
 
                       </td>
 
                       <td>
 
-                        {appointment.status ===
-                          "BOOKED" && (
-
-                          <button
-                            className="appointment-action-btn"
-                            onClick={() =>
-                              updateStatus(
-                                appointment.id,
-                                "WAITING"
-                              )
-                            }
-                          >
-                            Waiting
-                          </button>
-
-                        )}
+                       {appointment.status === "BOOKED" && (
+  <button
+    className="appointment-checkin-btn"
+    onClick={() => handleCheckIn(appointment.id)}
+  >
+    ✓ Check-In
+  </button>
+)}
 
                         {appointment.status ===
                           "WAITING" && (

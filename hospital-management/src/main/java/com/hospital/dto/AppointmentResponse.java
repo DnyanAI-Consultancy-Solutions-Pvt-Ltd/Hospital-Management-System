@@ -22,9 +22,11 @@ public class AppointmentResponse {
     // Appointment details
     private LocalDate appointmentDate;
     private LocalTime appointmentTime;
+    
     private String reason;
     private Integer tokenNumber;
     private AppointmentStatus status;
+    private boolean emergency; // ADD THIS
     
     private String referredBy;
 
@@ -130,5 +132,12 @@ public class AppointmentResponse {
 
     public void setStatus(AppointmentStatus status) {
         this.status = status;
+    }
+    public boolean isEmergency() {
+        return emergency;
+    }
+
+    public void setEmergency(boolean emergency) {
+        this.emergency = emergency;
     }
 }

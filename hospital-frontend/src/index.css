@@ -3448,3 +3448,73 @@ th {
     padding: 25px 20px;
   }
 }
+.dashboard-loader {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border: 3px solid #dbeafe;
+  border-top: 3px solid #2563eb;
+  border-radius: 50%;
+  animation: dashboardSpin 0.8s linear infinite;
+  vertical-align: middle;
+}
+
+@keyframes dashboardSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.dashboard-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px;
+  color: #64748b;
+  font-size: 14px;
+}
+.checkin-btn {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 7px 13px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.checkin-btn:hover {
+  background: #1d4ed8;
+}
+
+.checked-in-badge {
+  background: #dcfce7;
+  color: #15803d;
+  padding: 6px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.appointment-checkin-btn {
+  background: #16a34a;
+  color: #ffffff;
+  border: none;
+  padding: 7px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-right: 5px;
+}
+
+.appointment-checkin-btn:hover {
+  background: #15803d;
+}
+
+.status-checked-in {
+  background: #dcfce7;
+  color: #15803d;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}

@@ -150,6 +150,35 @@ notificationService.createNotification(
         return convertToResponse(
                 savedAppointment);
     }
+    @Transactional
+    public AppointmentResponse checkIn(Long appointmentId) {
+
+        Appointment appointment = appointmentRepository
+                .findById(appointmentId)
+                .orElseThrow(() ->
+                        new RuntimeException("Appointment not found"));
+
+        if (appointment.getStatus() == AppointmentStatus.CANCELLED) {
+            throw new RuntimeException(
+                    "Cancelled appointment cannot be checked in");
+        }
+
+        if (appointment.getStatus() == AppointmentStatus.COMPLETED) {
+            throw new RuntimeException(
+                    "Completed appointment cannot be checked in");
+        }
+
+        if (appointment.getStatus() == AppointmentStatus.CHECKED_IN) {
+            throw new RuntimeException(
+                    "Patient is already checked in");
+        }
+
+        appointment.setStatus(AppointmentStatus.CHECKED_IN);
+
+        Appointment updated = appointmentRepository.save(appointment);
+
+        return convertToResponse(updated);
+    }
     // Get All Appointments
     public List<AppointmentResponse> getAllAppointments() {
 
@@ -371,6 +400,7 @@ public AppointmentResponse updateStatus(
 
         response.setTokenNumber(
                 appointment.getTokenNumber());
+        response.setEmergency(appointment.isEmergency());
         return response;
     }
 }
